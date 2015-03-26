@@ -1,0 +1,207 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+#info {
+    position: absolute;
+    top: 0px;
+    width: 100%;
+    padding: 10px;
+    text-align: center;
+    color: #ff0000
+}
+</style>
+</head>
+
+
+<body>
+<div id="info">Tap to open the door.
+    <br/> <a href="javascript:Toggle();">TAP</a>
+
+</div>
+<script src = "js/three.min.js"></script>
+<script src = "js/OrbitControls.js"></script>
+
+<audio id = "opendoor" style = "display:none">
+<source src = "music/opendoor.mp3" type = 'audio/mp3'>
+<audio id = "closedoor" style = "display:none">
+<source src = "music/closedoor.mp3" type = 'audio/mp3'>
+</audio>
+
+
+<script>
+var camera, scene, renderer, light, light2, controls;
+var angle = 0;
+var turn = false;
+
+var topshaft,downshaft,door,sideedge,sideedge2,topedge,shaft1,shaft2,Handle,Handle2;
+
+init();
+animate();
+
+function Toggle() {
+    turn = !turn;
+}
+
+function init() {
+
+    scene = new THREE.Scene();
+
+    camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 10000);
+    camera.position.y = 100;
+    camera.position.z = 100;
+    scene.add(camera);
+
+	//假門軸
+    var geometry = new THREE.CylinderGeometry(1, 1, 5);
+    var material = new THREE.MeshLambertMaterial();
+	
+    topshaft = new THREE.Mesh(geometry, material);
+    scene.add(topshaft);
+	topshaft.position.set(0,40,0);
+	
+	var geometry2 = new THREE.CylinderGeometry(1, 1, 5);
+    var material2 = new THREE.MeshLambertMaterial();
+	
+    downshaft = new THREE.Mesh(geometry2, material2);
+    topshaft.add(downshaft);
+	downshaft.position.set(0,-25,0);
+	
+	//門板
+	var woodbrown = THREE.ImageUtils.loadTexture("images/woodbrown.jpg");
+	
+	var doorgeometry = new THREE.BoxGeometry(35, 50, 2);
+    var doormaterial = new THREE.MeshLambertMaterial({map:woodbrown});
+	
+	door = new THREE.Mesh(doorgeometry, doormaterial);
+	topshaft.add(door);
+	door.position.set(-18,-15,0);
+	
+	//門框
+	var yellow = THREE.ImageUtils.loadTexture("images/yellow.jpg");
+	
+	var dooredgegeometry1 = new THREE.BoxGeometry(2, 52, 2);
+    var dooredgematerial1 = new THREE.MeshLambertMaterial({map:yellow});
+	
+	sideedge = new THREE.Mesh(dooredgegeometry1, dooredgematerial1);
+	sideedge.position.set(-36,25,0);
+	scene.add(sideedge);	
+	
+	var dooredgegeometry2 = new THREE.BoxGeometry(2, 50, 2);
+    var dooredgematerial2 = new THREE.MeshLambertMaterial({map:yellow});
+	
+	sideedge2 = new THREE.Mesh(dooredgegeometry2, dooredgematerial2);
+	sideedge2.position.set(0.7,25,0);
+	scene.add(sideedge2);
+	
+	var dooredgegeometry3 = new THREE.BoxGeometry(38, 2, 2);
+    var dooredgematerial3 = new THREE.MeshLambertMaterial({map:yellow});
+	
+	topedge = new THREE.Mesh(dooredgegeometry3, dooredgematerial3);
+	topedge.position.set(-17,50,0);
+	scene.add(topedge);
+	
+	//門軸
+	var sliverwhite = THREE.ImageUtils.loadTexture("images/sliverwhite.jpg");
+	
+	var dooredgegeometry2 = new THREE.CylinderGeometry(1, 1, 5);
+    var dooredgematerial2 = new THREE.MeshLambertMaterial({map:sliverwhite});
+	
+	shaft1 = new THREE.Mesh(dooredgegeometry2, dooredgematerial2);
+	shaft1.position.set(0.4,40,2);
+	scene.add(shaft1);
+	
+	var dooredgegeometry2 = new THREE.CylinderGeometry(1, 1, 5);
+    var dooredgematerial2 = new THREE.MeshLambertMaterial({map:sliverwhite});
+	
+	shaft2 = new THREE.Mesh(dooredgegeometry2, dooredgematerial2);
+	shaft2.position.set(0.4,10,2);
+	scene.add(shaft2);
+
+	//門把
+	var Handlegeometry = new THREE.SphereGeometry(1, 20, 30);
+    var Handlematerial = new THREE.MeshLambertMaterial({map:sliverwhite});
+	
+    Handle = new THREE.Mesh(Handlegeometry, Handlematerial);
+    topshaft.add(Handle);
+	Handle.position.set(-30,-15,1.5);
+	
+	Handle2 = new THREE.Mesh(Handlegeometry, Handlematerial);
+    topshaft.add(Handle2);
+	Handle2.position.set(-30,-15,-1.5);
+	
+	//音效
+	/*var opendoor = document.getElementById("opendoor"); 
+function playVid() { 
+		opendoor.play(); 
+} 
+
+	var closedoor = document.getElementById("closedoor"); 
+function playVid2() { 
+		closedoor.play(); 
+} 
+	*/
+    light = new THREE.PointLight(0xffffff);
+    light.position.set(100, 300, 200);
+    scene.add(light);
+	
+	light2 = new THREE.PointLight(0xffffff);
+    light2.position.set(100, 300, -200);
+    scene.add(light2);
+
+    var gridXZ = new THREE.GridHelper(100, 10);
+    gridXZ.setColors(new THREE.Color(0xff0000), new THREE.Color(0xffffff));
+    scene.add(gridXZ);
+
+    renderer = new THREE.WebGLRenderer();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setClearColor(0x888888);
+
+    controls = new THREE.OrbitControls(camera, renderer.domElement);
+
+    document.body.appendChild(renderer.domElement);
+
+}
+
+function animate() {
+    controls.update();
+	
+	if (turn)
+	{
+		//playVid();
+		if(angle<=1.5){
+			angle+=0.03;
+			opendoor.play();
+			if(angle >= 1.5 )
+				opendoor.pause();
+		}
+	}
+	else
+	{
+		//playVid2();
+		if(angle>=0)
+			angle-=0.03;
+			//opendoor.play();
+			/*if(angle = 0.1)
+			{
+				//opendoor.pause();
+				closedoor.play();
+			}*/
+	}
+
+    //mesh.position.set(50 * Math.cos(angle), 0, -50 * Math.sin(angle));
+	topshaft.rotation.y = angle;
+    requestAnimationFrame(animate);
+    render();
+}
+
+function render() {
+    renderer.render(scene, camera);
+}
+
+
+</script>
+</body>
+
+</html>
